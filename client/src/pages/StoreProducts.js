@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import {
   Box,
   Typography,
@@ -25,7 +25,7 @@ const StoreProducts = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const { data } = await axios.get(`/api/products/${tenantId}`);
+        const { data } = await api.get(`/api/products/${tenantId}`);
         setTenant(data.tenant);
         setProducts(data.products || []);
       } catch (e) {

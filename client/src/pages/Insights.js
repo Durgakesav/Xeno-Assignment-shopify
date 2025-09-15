@@ -39,7 +39,7 @@ import {
   Cell
 } from 'recharts';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -86,7 +86,7 @@ const Insights = () => {
 
   const fetchOverview = async () => {
     try {
-      const response = await axios.get(`/api/insights/overview/${tenantId}`);
+      const response = await api.get(`/api/insights/overview/${tenantId}`);
       setOverview(response.data);
     } catch (error) {
       console.error('Error fetching overview:', error);
@@ -95,7 +95,7 @@ const Insights = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get(`/api/insights/customers/${tenantId}`);
+      const response = await api.get(`/api/insights/customers/${tenantId}`);
       setCustomers(response.data);
     } catch (error) {
       console.error('Error fetching customers:', error);
@@ -104,7 +104,7 @@ const Insights = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get(`/api/insights/orders/${tenantId}`);
+      const response = await api.get(`/api/insights/orders/${tenantId}`);
       setOrders(response.data);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -113,7 +113,7 @@ const Insights = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`/api/insights/products/${tenantId}`);
+      const response = await api.get(`/api/insights/products/${tenantId}`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -122,7 +122,7 @@ const Insights = () => {
 
   const fetchRevenueData = async () => {
     try {
-      const response = await axios.get(`/api/insights/revenue/${tenantId}?period=${dateRange}`);
+      const response = await api.get(`/api/insights/revenue/${tenantId}?period=${dateRange}`);
       setRevenueData(response.data);
     } catch (error) {
       console.error('Error fetching revenue data:', error);
@@ -131,7 +131,7 @@ const Insights = () => {
 
   const handleSync = async () => {
     try {
-      await axios.post(`/api/ingestion/sync/${tenantId}`, { entityType: 'all' });
+      await api.post(`/api/ingestion/sync/${tenantId}`, { entityType: 'all' });
       // Refresh all data
       await Promise.all([
         fetchOverview(),

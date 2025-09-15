@@ -20,7 +20,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 
 const Dashboard = () => {
   const [tenants, setTenants] = useState([]);
@@ -35,7 +35,7 @@ const Dashboard = () => {
 
   const fetchTenants = async () => {
     try {
-      const response = await axios.get('/api/tenants');
+      const response = await api.get('/api/tenants');
       setTenants(response.data.tenants);
     } catch (error) {
       setError('Failed to load stores');
@@ -47,7 +47,7 @@ const Dashboard = () => {
 
   const handleSync = async (tenantId) => {
     try {
-      await axios.post(`/api/ingestion/sync/${tenantId}`, { entityType: 'all' });
+      await api.post(`/api/ingestion/sync/${tenantId}`, { entityType: 'all' });
       // Refresh tenants to get updated counts
       fetchTenants();
     } catch (error) {

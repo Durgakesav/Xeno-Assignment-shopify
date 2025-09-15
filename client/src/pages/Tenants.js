@@ -29,7 +29,7 @@ import {
   Visibility as ViewIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 
 const Tenants = () => {
   const [tenants, setTenants] = useState([]);
@@ -51,7 +51,7 @@ const Tenants = () => {
 
   const fetchTenants = async () => {
     try {
-      const response = await axios.get('/api/tenants');
+      const response = await api.get('/api/tenants');
       setTenants(response.data.tenants);
     } catch (error) {
       setError('Failed to load stores');
@@ -108,10 +108,10 @@ const Tenants = () => {
           name: formData.name,
           ...(formData.accessToken !== '••••••••••••••••' && { accessToken: formData.accessToken })
         };
-        await axios.put(`/api/tenants/${editingTenant.id}`, updateData);
+        await api.put(`/api/tenants/${editingTenant.id}`, updateData);
       } else {
         // Create tenant
-        await axios.post('/api/tenants', formData);
+        await api.post('/api/tenants', formData);
       }
       
       await fetchTenants();
@@ -126,7 +126,7 @@ const Tenants = () => {
   const handleDelete = async (tenantId) => {
     if (window.confirm('Are you sure you want to delete this store? This will also delete all associated data.')) {
       try {
-        await axios.delete(`/api/tenants/${tenantId}`);
+        await api.delete(`/api/tenants/${tenantId}`);
         await fetchTenants();
       } catch (error) {
         setError(error.response?.data?.error || 'Failed to delete store');
@@ -136,7 +136,7 @@ const Tenants = () => {
 
   const handleSync = async (tenantId) => {
     try {
-      await axios.post(`/api/ingestion/sync/${tenantId}`, { entityType: 'all' });
+      await api.post(`/api/ingestion/sync/${tenantId}`, { entityType: 'all' });
       await fetchTenants(); // Refresh to get updated counts
     } catch (error) {
       setError('Sync failed');
