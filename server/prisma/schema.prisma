@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://neondb_owner:npg_5HSLADsBd3lv@ep-dry-sunset-adt5atou-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenants Tenant[]
+
+  @@map("users")
+}
+
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  shopifyUrl  String   @unique
+  accessToken String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customers  Customer[]
+  orders     Order[]
+  products   Product[]
+  syncLogs   SyncLog[]
+
+  @@map("tenants")
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  shopifyId   String
+  email       String?
+  firstName   String?
+  lastName    String?
+  phone       String?
+  totalSpent  Float    @default(0)
+  ordersCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@unique([tenantId, shopifyId])
+  @@map("customers")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  shopifyId       String
+  orderNumber     String
+  totalPrice      Float
+  subtotalPrice   Float
+  totalTax        Float
+  currency        String      @default("USD")
+  financialStatus String?
+  fulfillmentStatus String?
+  processedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerId String?
+  customer  Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  lineItems OrderLineItem[]
+
+  @@unique([tenantId, shopifyId])
+  @@map("orders")
+}
+
+model OrderLineItem {
+  id        String  @id @default(cuid())
+  quantity  Int
+  price     Float
+  title     String
+  variantId String?
+
+  // Relations
+  orderId String
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_line_items")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  shopifyId   String
+  title       String
+  handle      String
+  description String?
+  vendor      String?
+  productType String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, shopifyId])
+  @@map("products")
+}
+
+model SyncLog {
+  id          String      @id @default(cuid())
+  entityType  String      // 'customers', 'orders', 'products'
+  status      String      // 'success', 'error', 'partial'
+  recordsProcessed Int    @default(0)
+  recordsFailed    Int    @default(0)
+  errorMessage     String?
+  startedAt   DateTime    @default(now())
+  completedAt DateTime?
+
+  // Relations
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("sync_logs")
+}
+
+
+
